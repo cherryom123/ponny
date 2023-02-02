@@ -1,4 +1,3 @@
 heyoo==0.0.8
-os
 flask
 
