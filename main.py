@@ -1,24 +1,40 @@
 import os
 import logging
+import json
 from heyoo import WhatsApp
-from dotenv import load_dotenv
+from os import environ
 from flask import Flask, request, make_response
 
-# Initialize Flask App
-app = Flask(__name__)
 
-# Load .env file
-load_dotenv()
-messenger = WhatsApp(os.getenv("TOKEN"), phone_number_id=os.getenv("PHONE_NUMBER_ID"))
-VERIFY_TOKEN = "30cca545-3838-48b2-80a7-9e43b1ae8ce4"
+messenger = WhatsApp(environ.get("TOKEN"), phone_number_id=environ.get("PHONE_NUMBER_ID")) #this should be writen as 
+#WhatsApp(token = "inpust accesstoken", phone_number_id="input phone number id") #messages are not recieved without this pattern
+
+
+# Here's an article on how to get the application secret from Facebook developers portal.
+# https://support.appmachine.com/support/solutions/articles/80000978442
+VERIFY_TOKEN = environ.get("APP_SECRET") #application secret here
+
+#to be tested in prod environment
+# messenger = WhatsApp(os.getenv("heroku whatsapp token"),phone_number_id='105582068896304')
+# VERIFY_TOKEN = "heroku whatsapp token"
+
 
 # Logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
+app = Flask(__name__)
 
-@app.route("/webhook", methods=["GET", "POST"])
+
+
+@app.route('/')
+def index():
+    return "Hello, It Works"
+
+
+
+@app.route("/whatsapi", methods=["GET", "POST"])
 def hook():
     if request.method == "GET":
         if request.args.get("hub.verify_token") == VERIFY_TOKEN:
@@ -101,8 +117,8 @@ def hook():
                 print(f"Message : {delivery}")
             else:
                 print("No new message")
-    return "OK", 200
+    return "ok"
 
 
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+if __name__ == '__main__': 
+    app.run(debug=True)
